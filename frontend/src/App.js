@@ -18,7 +18,7 @@ import './App.css';
 function App() {
   return (
     <AuthProvider>
-      <Router future={{ v7_relativeSplatPath: true }}>
+      <Router future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
         <Header />
         <main className="py-3">
           <Container>

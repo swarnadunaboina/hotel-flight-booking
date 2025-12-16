@@ -1,5 +1,5 @@
 
-import { IsEmail, IsString, MinLength, IsEnum } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsEnum, IsOptional } from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
@@ -20,4 +20,26 @@ export class CreateUserDto {
 
   @IsString()
   phone?: string;
+
+  @IsString()
+  @IsOptional()
+  provider?: string;
+
+  @IsString()
+  @IsOptional()
+  avatar?: string;
+
+  @IsString()
+  @IsOptional()
+  googleId?: string;
+
+  @IsString()
+  @IsOptional()
+  facebookId?: string;
+
+  @IsOptional()
+  createdAt?: Date;
+
+  @IsOptional()
+  lastLoginAt?: Date;
 }

@@ -13,17 +13,21 @@ import { db } from '../firebase';
  */
 export const saveUserData = async (userData) => {
   try {
-    // Determine the provider and use the appropriate endpoint
-    const endpoint = userData.provider === 'google.com' 
-      ? `${API_URL}/auth/social/google`
-      : userData.provider === 'facebook.com' 
-      ? `${API_URL}/auth/social/facebook`
-      : `${API_URL}/users`;
-    
-    // Send user data to your backend API
-    const response = await axios.post(endpoint, userData);
-    console.log('User data saved successfully:', response.data);
-    return response.data;
+    // Create a reference to the user document in Firestore
+    const userRef = doc(db, 'users', userData.uid);
+
+    // Save user data to Firestore
+    await setDoc(userRef, {
+      uid: userData.uid,
+      displayName: userData.displayName,
+      email: userData.email,
+      photoURL: userData.photoURL,
+      provider: userData.provider,
+      createdAt: new Date()
+    });
+
+    console.log('User data saved successfully:', userData);
+    return userData;
   } catch (error) {
     console.error('Error saving user data:', error);
     throw error;
@@ -37,8 +41,15 @@ export const saveUserData = async (userData) => {
  */
 export const getUserData = async (uid) => {
   try {
-    const response = await axios.get(`${API_URL}/users/${uid}`);
-    return response.data;
+    const userRef = doc(db, 'users', uid);
+    const userDoc = await getDoc(userRef);
+
+    if (userDoc.exists()) {
+      return userDoc.data();
+    } else {
+      console.log('No such user!');
+      return null;
+    }
   } catch (error) {
     console.error('Error getting user data:', error);
     throw error;
@@ -53,9 +64,10 @@ export const getUserData = async (uid) => {
  */
 export const updateUserData = async (uid, userData) => {
   try {
-    const response = await axios.put(`${API_URL}/users/${uid}`, userData);
-    console.log('User data updated successfully:', response.data);
-    return response.data;
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, userData);
+    console.log('User data updated successfully');
+    return true;
   } catch (error) {
     console.error('Error updating user data:', error);
     throw error;

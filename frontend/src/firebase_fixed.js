@@ -48,7 +48,7 @@ export const signInWithGoogle = async () => {
     return result;
   } catch (error) {
     console.error("Google sign-in error:", error);
-    
+
     // Provide more specific error messages
     if (error.code === 'auth/popup-closed-by-user') {
       throw new Error('Sign-in popup was closed before completion. Please try again.');
@@ -57,7 +57,7 @@ export const signInWithGoogle = async () => {
     } else if (error.code === 'auth/cancelled-popup-request') {
       throw new Error('Sign-in was cancelled. Please try again.');
     }
-    
+
     throw error;
   }
 };
@@ -69,7 +69,7 @@ export const signInWithFacebook = async () => {
     return result;
   } catch (error) {
     console.error("Facebook sign-in error:", error);
-    
+
     // Provide more specific error messages
     if (error.code === 'auth/popup-closed-by-user') {
       throw new Error('Sign-in popup was closed before completion. Please try again.');
@@ -78,7 +78,7 @@ export const signInWithFacebook = async () => {
     } else if (error.code === 'auth/cancelled-popup-request') {
       throw new Error('Sign-in was cancelled. Please try again.');
     }
-    
+
     throw error;
   }
 };
@@ -88,7 +88,7 @@ export const signUp = async (email, password) => {
     return await createUserWithEmailAndPassword(auth, email, password);
   } catch (error) {
     console.error("Sign up error:", error);
-    
+
     // Provide more specific error messages
     if (error.code === 'auth/email-already-in-use') {
       throw new Error('This email is already registered. Please use a different email or try logging in.');
@@ -97,7 +97,7 @@ export const signUp = async (email, password) => {
     } else if (error.code === 'auth/invalid-email') {
       throw new Error('Please enter a valid email address.');
     }
-    
+
     throw error;
   }
 };
@@ -107,7 +107,7 @@ export const signIn = async (email, password) => {
     return await signInWithEmailAndPassword(auth, email, password);
   } catch (error) {
     console.error("Sign in error:", error);
-    
+
     // Provide more specific error messages
     if (error.code === 'auth/user-not-found') {
       throw new Error('No account found with this email. Please register first.');
@@ -120,7 +120,7 @@ export const signIn = async (email, password) => {
     } else if (error.code === 'auth/too-many-requests') {
       throw new Error('Too many failed login attempts. Please try again later.');
     }
-    
+
     throw error;
   }
 };

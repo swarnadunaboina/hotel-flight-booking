@@ -38,4 +38,12 @@ export class UpdateUserDto {
   @IsString()
   @IsOptional()
   facebookId?: string;
+
+  @IsString()
+  @IsOptional()
+  provider?: string;
+
+  @IsString()
+  @IsOptional()
+  lastLoginAt?: Date;
 }
