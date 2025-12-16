@@ -1,0 +1,130 @@
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../firebase';
+import { signInWithGoogle, signInWithFacebook, logout, signUp, signIn, updateUserProfile } from '../firebase';
+
+const AuthContext = createContext();
+
+export function useAuth() {
+  return useContext(AuthContext);
+}
+
+export { AuthContext };
+
+export function AuthProvider({ children }) {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Monitor authentication state
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, user => {
+      setCurrentUser(user);
+      setLoading(false);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  // Login with email and password
+  const login = async (email, password) => {
+    try {
+      return signIn(email, password);
+    } catch (error) {
+      console.error("Error logging in:", error);
+      throw error;
+    }
+  };
+
+  // Register with email and password
+  const register = async (name, email, password) => {
+    try {
+      const result = await signUp(email, password);
+      
+      // Update the user profile with the name
+      await updateUserProfile({
+        displayName: name
+      });
+      
+      // Save user details to database
+      await saveUserToDatabase(result.user);
+      
+      return result;
+    } catch (error) {
+      console.error("Error registering:", error);
+      throw error;
+    }
+  };
+
+  // Save user details to database
+  const saveUserToDatabase = async (user) => {
+    try {
+      // Import the database service
+      const { saveUserData } = await import('../services/databaseService');
+      
+      // Prepare user data
+      const userData = {
+        uid: user.uid,
+        displayName: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
+        provider: user.providerData[0]?.providerId
+      };
+      
+      // Save user data to database
+      await saveUserData(userData);
+      
+      return true;
+    } catch (error) {
+      console.error("Error saving user to database:", error);
+      // For development, continue even if saving to database fails
+      // In production, you might want to handle this differently
+      return true;
+    }
+  };
+
+  // Social login functions
+  const googleSignIn = async () => {
+    try {
+      const result = await signInWithGoogle();
+      // Save user details to database
+      await saveUserToDatabase(result.user);
+      return result;
+    } catch (error) {
+      console.error("Error with Google sign-in:", error);
+      throw error;
+    }
+  };
+
+  const facebookSignIn = async () => {
+    try {
+      const result = await signInWithFacebook();
+      // Save user details to database
+      await saveUserToDatabase(result.user);
+      return result;
+    } catch (error) {
+      console.error("Error with Facebook sign-in:", error);
+      throw error;
+    }
+  };
+
+  // Logout function
+  const logOut = () => {
+    return logout();
+  };
+
+  const value = {
+    currentUser,
+    loading,
+    login,
+    register,
+    googleSignIn,
+    facebookSignIn,
+    logOut
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {!loading && children}
+    </AuthContext.Provider>
+  );
+}
