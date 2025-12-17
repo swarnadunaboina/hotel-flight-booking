@@ -37,7 +37,7 @@ export function AuthProvider({ children }) {
         console.error("Error checking redirect result:", error);
       }
     };
-    
+
     checkRedirectResult();
 
     return unsubscribe;
@@ -69,20 +69,10 @@ export function AuthProvider({ children }) {
       return result;
     } catch (error) {
       console.error("Error registering:", error);
-<<<<<<< HEAD
-      
-=======
-
->>>>>>> 0223717e7b0a37f063053dd82c79c5d3b17df28d
       // If the email is already in use, provide a more helpful error message
       if (error.code === 'auth/email-already-in-use') {
         throw new Error('This email is already registered. Please use a different email or try logging in.');
       }
-<<<<<<< HEAD
-      
-=======
-
->>>>>>> 0223717e7b0a37f063053dd82c79c5d3b17df28d
       throw error;
     }
   };
@@ -92,11 +82,6 @@ export function AuthProvider({ children }) {
     try {
       // Import the database service
       const { saveUserData } = await import('../services/databaseServiceNew');
-<<<<<<< HEAD
-      
-=======
-
->>>>>>> 0223717e7b0a37f063053dd82c79c5d3b17df28d
       // Prepare user data
       const userData = {
         uid: user.uid,
@@ -153,7 +138,8 @@ export function AuthProvider({ children }) {
     register,
     googleSignIn,
     facebookSignIn,
-    logOut
+    logOut,
+    redirectResult
   };
 
   return (
