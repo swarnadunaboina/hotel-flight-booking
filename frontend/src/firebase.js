@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, sendPasswordResetEmail } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
@@ -131,7 +131,7 @@ export const signIn = async (email, password) => {
     } else if (error.code === 'auth/too-many-requests') {
       throw new Error('Too many failed login attempts. Please try again later.');
     } else if (error.code === 'auth/invalid-login-credentials') {
-      throw new Error('Invalid login credentials. This email might be registered with a social login method. Try signing in with Google or Facebook, or reset your password.');
+      throw new Error('Invalid login credentials. This email is already registered with a social login method (Google/Facebook). Please use the social login button above to sign in, or reset your password if you want to use email/password.');
     }
 
     throw error;
@@ -146,4 +146,4 @@ export const logout = () => {
   return signOut(auth);
 };
 
-export { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile };
+export { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, sendPasswordResetEmail };

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Form, Button, Card, Container, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import { auth, sendPasswordResetEmail } from '../firebase';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -15,11 +16,10 @@ const ForgotPassword = () => {
       setError('');
       setMessage('');
       setLoading(true);
-      // Password reset logic will be added here
-      console.log('Password reset for:', email);
-      setMessage('Password reset link has been sent to your email');
+      await sendPasswordResetEmail(auth, email);
+      setMessage('Password reset email sent! Check your inbox.');
     } catch (error) {
-      setError('Failed to send password reset link');
+      setError('Failed to send password reset email: ' + error.message);
     }
 
     setLoading(false);

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Form, Button, Card, Container, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { auth } from '../firebase';
+import { auth, sendPasswordResetEmail } from '../firebase';
 import SocialLoginNew from '../components/SocialLoginNew';
 
 const Login = () => {
@@ -36,7 +36,7 @@ const Login = () => {
       } else if (error.code === 'auth/too-many-requests') {
         setError('Too many failed login attempts. Please try again later.');
       } else if (error.code === 'auth/invalid-login-credentials') {
-        setError('Invalid login credentials. This email might be registered with a social login method. Try signing in with Google or Facebook, or reset your password.');
+        setError('Invalid login credentials. This email is already registered with a social login method (Google/Facebook). Please use the social login button above to sign in, or reset your password if you want to use email/password.');
       } else {
         setError('Login failed: ' + error.message);
       }
@@ -86,7 +86,7 @@ const Login = () => {
       setError('');
       setMessage('');
       setLoading(true);
-      await auth.sendPasswordResetEmail(email);
+      await sendPasswordResetEmail(auth, email);
       setMessage('Password reset email sent! Check your inbox.');
       setLoading(false);
     } catch (error) {
@@ -127,8 +127,8 @@ const Login = () => {
               </Button>
             </Form>
 
-            <div className="w-100 text-center mt-3 mb-3">
-              <p className="text-muted">Or login with:</p>
+            <div className="w-100 text-center mt-4 mb-3">
+              <p className="text-center"><strong>Or login with:</strong></p>
             </div>
             <SocialLoginNew
               onGoogleSignIn={handleGoogleSignIn}
@@ -138,9 +138,7 @@ const Login = () => {
             />
 
             <div className="w-100 text-center mt-3">
-              <Button variant="link" onClick={handlePasswordReset} disabled={loading}>
-                Forgot Password?
-              </Button>
+              <Link to="/forgot-password">Forgot Password?</Link>
             </div>
           </Card.Body>
         </Card>

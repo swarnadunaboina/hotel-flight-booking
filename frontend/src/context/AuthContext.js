@@ -75,7 +75,7 @@ export function AuthProvider({ children }) {
       console.error("Error registering:", error);
       // If the email is already in use, provide a more helpful error message
       if (error.code === 'auth/email-already-in-use') {
-        throw new Error('This email is already registered. Please use a different email or try logging in.');
+        throw new Error('This email is already registered with a social login method (Google/Facebook). Please use the social login button to sign in, or reset your password if you want to use email/password.');
       }
       throw error;
     }
