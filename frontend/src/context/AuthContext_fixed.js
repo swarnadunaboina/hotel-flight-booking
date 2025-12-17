@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { onAuthStateChanged, getRedirectResult } from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../firebase';
 import { signInWithGoogle, signInWithFacebook, logout, signUp, signIn, updateUserProfile } from '../firebase';
 
@@ -14,7 +14,6 @@ export { AuthContext };
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [redirectResult, setRedirectResult] = useState(null);
 
   // Monitor authentication state
   useEffect(() => {
@@ -22,23 +21,6 @@ export function AuthProvider({ children }) {
       setCurrentUser(user);
       setLoading(false);
     });
-
-    // Check for redirect result when component mounts
-    const checkRedirectResult = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result && result.user) {
-          // Save user details to database
-          await saveUserToDatabase(result.user);
-          // Store the redirect result for components to use
-          setRedirectResult(result);
-        }
-      } catch (error) {
-        console.error("Error checking redirect result:", error);
-      }
-    };
-    
-    checkRedirectResult();
 
     return unsubscribe;
   }, []);
@@ -69,20 +51,12 @@ export function AuthProvider({ children }) {
       return result;
     } catch (error) {
       console.error("Error registering:", error);
-<<<<<<< HEAD
-      
-=======
 
->>>>>>> 0223717e7b0a37f063053dd82c79c5d3b17df28d
       // If the email is already in use, provide a more helpful error message
       if (error.code === 'auth/email-already-in-use') {
         throw new Error('This email is already registered. Please use a different email or try logging in.');
       }
-<<<<<<< HEAD
-      
-=======
 
->>>>>>> 0223717e7b0a37f063053dd82c79c5d3b17df28d
       throw error;
     }
   };
@@ -92,11 +66,7 @@ export function AuthProvider({ children }) {
     try {
       // Import the database service
       const { saveUserData } = await import('../services/databaseServiceNew');
-<<<<<<< HEAD
-      
-=======
 
->>>>>>> 0223717e7b0a37f063053dd82c79c5d3b17df28d
       // Prepare user data
       const userData = {
         uid: user.uid,
