@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Form, Button, Card, Container, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { auth } from '../firebase';
 import SocialLoginNew from '../components/SocialLoginNew';
 
 const Login = () => {
@@ -10,8 +11,9 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   // No need to handle redirect result since we're using popup authentication
 
   const handleSubmit = async (e) => {
@@ -26,13 +28,15 @@ const Login = () => {
       if (error.code === 'auth/user-not-found') {
         setError('No account found with this email. Please register first.');
       } else if (error.code === 'auth/wrong-password') {
-        setError('Incorrect password. Please try again.');
+        setError('Incorrect password. Please try again or reset your password.');
       } else if (error.code === 'auth/invalid-email') {
         setError('Please enter a valid email address.');
       } else if (error.code === 'auth/user-disabled') {
         setError('This account has been disabled. Please contact support.');
       } else if (error.code === 'auth/too-many-requests') {
         setError('Too many failed login attempts. Please try again later.');
+      } else if (error.code === 'auth/invalid-login-credentials') {
+        setError('Invalid login credentials. This email might be registered with a social login method. Try signing in with Google or Facebook, or reset your password.');
       } else {
         setError('Login failed: ' + error.message);
       }
@@ -77,6 +81,20 @@ const Login = () => {
     }
   };
 
+  const handlePasswordReset = async () => {
+    try {
+      setError('');
+      setMessage('');
+      setLoading(true);
+      await auth.sendPasswordResetEmail(email);
+      setMessage('Password reset email sent! Check your inbox.');
+      setLoading(false);
+    } catch (error) {
+      setError('Failed to send password reset email: ' + error.message);
+      setLoading(false);
+    }
+  };
+
   return (
     <Container className="d-flex align-items-center justify-content-center" style={{ minHeight: '80vh' }}>
       <div className="w-100" style={{ maxWidth: '400px' }}>
@@ -84,6 +102,7 @@ const Login = () => {
           <Card.Body>
             <h2 className="text-center mb-4">Login</h2>
             {error && <Alert variant="danger">{error}</Alert>}
+            {message && <Alert variant="success">{message}</Alert>}
             <Form onSubmit={handleSubmit}>
               <Form.Group id="email" className="mb-3">
                 <Form.Label>Email</Form.Label>
@@ -107,16 +126,21 @@ const Login = () => {
                 Login
               </Button>
             </Form>
-            
-            <SocialLoginNew 
+
+            <div className="w-100 text-center mt-3 mb-3">
+              <p className="text-muted">Or login with:</p>
+            </div>
+            <SocialLoginNew
               onGoogleSignIn={handleGoogleSignIn}
               onFacebookSignIn={handleFacebookSignIn}
               loading={loading}
               isLogin={true}
             />
-            
+
             <div className="w-100 text-center mt-3">
-              <Link to="/forgot-password">Forgot Password?</Link>
+              <Button variant="link" onClick={handlePasswordReset} disabled={loading}>
+                Forgot Password?
+              </Button>
             </div>
           </Card.Body>
         </Card>

@@ -46,7 +46,11 @@ export function AuthProvider({ children }) {
   // Login with email and password
   const login = async (email, password) => {
     try {
-      return signIn(email, password);
+      const result = await signIn(email, password);
+      if (result && result.user) {
+        await saveUserToDatabase(result.user);
+      }
+      return result;
     } catch (error) {
       console.error("Error logging in:", error);
       throw error;

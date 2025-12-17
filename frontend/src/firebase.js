@@ -46,6 +46,10 @@ facebookProvider.addScope('public_profile');
 // Functions for authentication
 export const signInWithGoogle = async () => {
   try {
+    // Always prompt for account selection
+    googleProvider.setCustomParameters({
+      prompt: 'select_account'
+    });
     // Use popup instead of redirect to avoid 404 errors
     const result = await signInWithPopup(auth, googleProvider);
     return result;
@@ -67,6 +71,10 @@ export const signInWithGoogle = async () => {
 
 export const signInWithFacebook = async () => {
   try {
+    // Always prompt for account selection
+    facebookProvider.setCustomParameters({
+      prompt: 'select_account'
+    });
     // Use popup instead of redirect to avoid 404 errors
     const result = await signInWithPopup(auth, facebookProvider);
     return result;
@@ -115,13 +123,15 @@ export const signIn = async (email, password) => {
     if (error.code === 'auth/user-not-found') {
       throw new Error('No account found with this email. Please register first.');
     } else if (error.code === 'auth/wrong-password') {
-      throw new Error('Incorrect password. Please try again.');
+      throw new Error('Incorrect password. Please try again or reset your password.');
     } else if (error.code === 'auth/invalid-email') {
       throw new Error('Please enter a valid email address.');
     } else if (error.code === 'auth/user-disabled') {
       throw new Error('This account has been disabled. Please contact support.');
     } else if (error.code === 'auth/too-many-requests') {
       throw new Error('Too many failed login attempts. Please try again later.');
+    } else if (error.code === 'auth/invalid-login-credentials') {
+      throw new Error('Invalid login credentials. This email might be registered with a social login method. Try signing in with Google or Facebook, or reset your password.');
     }
 
     throw error;
