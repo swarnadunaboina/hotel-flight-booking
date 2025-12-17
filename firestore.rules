@@ -1,0 +1,27 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can read and write their own profile data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Only authenticated users can access booking data
+    match /bookings/{bookingId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Only authenticated users can access hotel data
+    match /hotels/{hotelId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.token.admin == true;
+    }
+    
+    // Only authenticated users can access flight data
+    match /flights/{flightId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.token.admin == true;
+    }
+  }
+}

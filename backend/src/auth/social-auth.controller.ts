@@ -19,7 +19,7 @@ export class SocialAuthController {
       if (existingUser) {
         // User exists, update their info and return
         const updatedUser = await this.usersService.update(existingUser._id, {
-          photoURL: userData.photoURL,
+          avatar: userData.photoURL,
           lastLoginAt: new Date(),
           provider: 'google'
         });
@@ -27,8 +27,13 @@ export class SocialAuthController {
       } else {
         // New user, create account
         const newUser = await this.usersService.create({
-          ...userData,
+          firstName: userData.displayName.split(' ')[0],
+          lastName: userData.displayName.split(' ')[1] || '',
+          email: userData.email,
+          password: Math.random().toString(36).slice(-8), // Random password for social auth
+          avatar: userData.photoURL,
           provider: 'google',
+          googleId: userData.uid,
           createdAt: new Date(),
           lastLoginAt: new Date()
         });
@@ -53,7 +58,7 @@ export class SocialAuthController {
       if (existingUser) {
         // User exists, update their info and return
         const updatedUser = await this.usersService.update(existingUser._id, {
-          photoURL: userData.photoURL,
+          avatar: userData.photoURL,
           lastLoginAt: new Date(),
           provider: 'facebook'
         });
@@ -61,8 +66,13 @@ export class SocialAuthController {
       } else {
         // New user, create account
         const newUser = await this.usersService.create({
-          ...userData,
+          firstName: userData.displayName.split(' ')[0],
+          lastName: userData.displayName.split(' ')[1] || '',
+          email: userData.email,
+          password: Math.random().toString(36).slice(-8), // Random password for social auth
+          avatar: userData.photoURL,
           provider: 'facebook',
+          facebookId: userData.uid,
           createdAt: new Date(),
           lastLoginAt: new Date()
         });

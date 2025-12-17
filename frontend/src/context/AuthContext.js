@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, getRedirectResult } from 'firebase/auth';
 import { auth } from '../firebase';
 import { signInWithGoogle, signInWithFacebook, logout, signUp, signIn, updateUserProfile } from '../firebase';
 
@@ -14,6 +14,7 @@ export { AuthContext };
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [redirectResult, setRedirectResult] = useState(null);
 
   // Monitor authentication state
   useEffect(() => {
@@ -21,6 +22,23 @@ export function AuthProvider({ children }) {
       setCurrentUser(user);
       setLoading(false);
     });
+
+    // Check for redirect result when component mounts
+    const checkRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result && result.user) {
+          // Save user details to database
+          await saveUserToDatabase(result.user);
+          // Store the redirect result for components to use
+          setRedirectResult(result);
+        }
+      } catch (error) {
+        console.error("Error checking redirect result:", error);
+      }
+    };
+    
+    checkRedirectResult();
 
     return unsubscribe;
   }, []);
@@ -51,6 +69,12 @@ export function AuthProvider({ children }) {
       return result;
     } catch (error) {
       console.error("Error registering:", error);
+      
+      // If the email is already in use, provide a more helpful error message
+      if (error.code === 'auth/email-already-in-use') {
+        throw new Error('This email is already registered. Please use a different email or try logging in.');
+      }
+      
       throw error;
     }
   };
@@ -59,7 +83,7 @@ export function AuthProvider({ children }) {
   const saveUserToDatabase = async (user) => {
     try {
       // Import the database service
-      const { saveUserData } = await import('../services/databaseService');
+      const { saveUserData } = await import('../services/databaseServiceNew');
       
       // Prepare user data
       const userData = {
@@ -86,8 +110,7 @@ export function AuthProvider({ children }) {
   const googleSignIn = async () => {
     try {
       const result = await signInWithGoogle();
-      // Save user details to database
-      await saveUserToDatabase(result.user);
+      // With popup authentication, we get the result immediately
       return result;
     } catch (error) {
       console.error("Error with Google sign-in:", error);
@@ -98,8 +121,7 @@ export function AuthProvider({ children }) {
   const facebookSignIn = async () => {
     try {
       const result = await signInWithFacebook();
-      // Save user details to database
-      await saveUserToDatabase(result.user);
+      // With popup authentication, we get the result immediately
       return result;
     } catch (error) {
       console.error("Error with Facebook sign-in:", error);

@@ -11,6 +11,8 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // No need to handle redirect result since we're using popup authentication
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,7 +23,19 @@ const Login = () => {
       await login(email, password);
       navigate('/');
     } catch (error) {
-      setError('Login failed, please check your credentials');
+      if (error.code === 'auth/user-not-found') {
+        setError('No account found with this email. Please register first.');
+      } else if (error.code === 'auth/wrong-password') {
+        setError('Incorrect password. Please try again.');
+      } else if (error.code === 'auth/invalid-email') {
+        setError('Please enter a valid email address.');
+      } else if (error.code === 'auth/user-disabled') {
+        setError('This account has been disabled. Please contact support.');
+      } else if (error.code === 'auth/too-many-requests') {
+        setError('Too many failed login attempts. Please try again later.');
+      } else {
+        setError('Login failed: ' + error.message);
+      }
     }
 
     setLoading(false);
@@ -32,12 +46,15 @@ const Login = () => {
       setError('');
       setLoading(true);
       const result = await googleSignIn();
-      console.log("Google sign-in successful:", result.user);
-      navigate('/');
+      // With popup authentication, we get the result immediately
+      if (result && result.user) {
+        console.log("Google sign-in successful:", result.user);
+        navigate('/');
+      }
+      setLoading(false);
     } catch (error) {
       setError('Failed to sign in with Google: ' + error.message);
       console.error(error);
-    } finally {
       setLoading(false);
     }
   };
@@ -47,12 +64,15 @@ const Login = () => {
       setError('');
       setLoading(true);
       const result = await facebookSignIn();
-      console.log("Facebook sign-in successful:", result.user);
-      navigate('/');
+      // With popup authentication, we get the result immediately
+      if (result && result.user) {
+        console.log("Facebook sign-in successful:", result.user);
+        navigate('/');
+      }
+      setLoading(false);
     } catch (error) {
       setError('Failed to sign in with Facebook: ' + error.message);
       console.error(error);
-    } finally {
       setLoading(false);
     }
   };

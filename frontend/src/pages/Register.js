@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Button, Card, Container, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import SocialLoginNew from '../components/SocialLoginNew';
 
 const Register = () => {
-  const { register, googleSignIn, facebookSignIn } = useAuth();
+  const { register, googleSignIn, facebookSignIn, redirectResult } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -13,6 +13,14 @@ const Register = () => {
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // Handle redirect result
+  useEffect(() => {
+    if (redirectResult && redirectResult.user) {
+      console.log("Authentication successful after redirect:", redirectResult.user);
+      navigate('/');
+    }
+  }, [redirectResult, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,7 +35,15 @@ const Register = () => {
       await register(name, email, password);
       navigate('/');
     } catch (error) {
-      setError('Registration failed, please try again');
+      if (error.code === 'auth/email-already-in-use') {
+        setError('This email is already registered. Please use a different email or try logging in.');
+      } else if (error.code === 'auth/weak-password') {
+        setError('Password is too weak. Please use a stronger password.');
+      } else if (error.code === 'auth/invalid-email') {
+        setError('Please enter a valid email address.');
+      } else {
+        setError('Registration failed: ' + error.message);
+      }
     }
 
     setLoading(false);
@@ -38,12 +54,18 @@ const Register = () => {
       setError('');
       setLoading(true);
       const result = await googleSignIn();
-      console.log("Google sign-up successful:", result.user);
-      navigate('/');
+      // For redirect-based auth, we won't get a result immediately
+      // The navigation will happen after the redirect
+      if (result && result.user) {
+        console.log("Google sign-up successful:", result.user);
+        navigate('/');
+      } else {
+        // Show a message that the user will be redirected
+        setError('You will be redirected to Google for authentication...');
+      }
     } catch (error) {
       setError('Failed to sign up with Google: ' + error.message);
       console.error(error);
-    } finally {
       setLoading(false);
     }
   };
@@ -53,12 +75,18 @@ const Register = () => {
       setError('');
       setLoading(true);
       const result = await facebookSignIn();
-      console.log("Facebook sign-up successful:", result.user);
-      navigate('/');
+      // For redirect-based auth, we won't get a result immediately
+      // The navigation will happen after the redirect
+      if (result && result.user) {
+        console.log("Facebook sign-up successful:", result.user);
+        navigate('/');
+      } else {
+        // Show a message that the user will be redirected
+        setError('You will be redirected to Facebook for authentication...');
+      }
     } catch (error) {
       setError('Failed to sign up with Facebook: ' + error.message);
       console.error(error);
-    } finally {
       setLoading(false);
     }
   };
