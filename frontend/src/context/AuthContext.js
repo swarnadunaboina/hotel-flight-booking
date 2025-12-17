@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { onAuthStateChanged, getRedirectResult } from 'firebase/auth';
 import { auth } from '../firebase';
 import { signInWithGoogle, signInWithFacebook, logout, signUp, signIn, updateUserProfile } from '../firebase';
+import { saveUserData, getUserData, updateUserData } from '../services/backendService';
 
 const AuthContext = createContext();
 
